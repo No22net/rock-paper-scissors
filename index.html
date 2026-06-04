@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>سنگ · کاغذ · قیچی | بازی مدرن</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(145deg, #1a2a3a 0%, #0f1a24 100%);
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            --card-border: 1px solid rgba(255, 255, 255, 0.2);
+            --gold-gradient: linear-gradient(135deg, #FFE6B0, #FFB347);
+            --panel-bg: rgba(0, 0, 0, 0.55);
+            --panel-border: 1px solid rgba(255, 215, 150, 0.4);
+            --stat-bg: #0e1a22c9;
+            --stat-border: #ffb34760;
+            --text-primary: #FFDEA5;
+            --text-secondary: #fbe9c3;
+            --accent-color: #FACC15;
+            --button-rock: radial-gradient(circle at 30% 10%, #5f4c3b, #3a2a20);
+            --button-paper: radial-gradient(circle at 30% 10%, #3f4a3c, #24322a);
+            --button-scissor: radial-gradient(circle at 30% 10%, #3c2e3f, #221d2c);
+            --button-shadow: 0 12px 0 #0a1219;
+            --transition-bounce: 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            --border-radius-xl: 64px;
+            --border-radius-lg: 56px;
+            --border-radius-md: 48px;
+            --border-radius-sm: 40px;
+            --font-family: 'Segoe UI', 'Vazir', system-ui, 'Tahoma', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            font-family: var(--font-family);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .game-container {
+            max-width: 650px;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            border-radius: var(--border-radius-xl);
+            padding: 24px 22px 42px;
+            box-shadow: var(--card-shadow);
+            border: var(--card-border);
+            transition: all 0.2s ease;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: clamp(1.9rem, 5vw, 2.6rem);
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 28px;
+            word-break: keep-all;
+        }
+
+        .stats-panel {
+            background: var(--panel-bg);
+            border-radius: var(--border-radius-lg);
+            padding: 18px 20px;
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px 20px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: var(--panel-border);
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card {
+            background: var(--stat-bg);
+            border-radius: var(--border-radius-md);
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            transition: 0.2s;
+            border-bottom: 2px solid var(--stat-border);
+        }
+
+        .stat-card p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: rgba(0, 0, 0, 0.33);
+            padding: 4px 14px;
+            border-radius: var(--border-radius-sm);
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card input {
+            background: #1f2e38;
+            border: none;
+            width: 70px;
+            text-align: center;
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            border-radius: 60px;
+            padding: 6px 0;
+            font-family: monospace;
+            letter-spacing: 2px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: 0.1s;
+            pointer-events: none;
+        }
+
+        .winner-card {
+            grid-column: span 2;
+            background: linear-gradient(105deg, #2c2418, #1e1b16);
+            border-bottom: 2px solid gold;
+        }
+
+        .winner-card input {
+            width: 180px;
+            font-size: 1.3rem;
+            color: #FFD966;
+            background: rgba(0, 0, 0, 0.67);
+            font-weight: bold;
+        }
+
+        .choice-buttons {
+            display: flex;
+            justify-content: space-evenly;
+            gap: 18px;
+            margin: 25px 0 30px;
+            flex-wrap: wrap;
+        }
+
+        .game-btn {
+            background: var(--button-rock);
+            border: none;
+            width: 110px;
+            padding: 18px 0;
+            border-radius: 80px;
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition-bounce);
+            box-shadow: var(--button-shadow);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            letter-spacing: 2px;
+            will-change: transform;
+        }
+
+        .game-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 5px 0 #0a1219;
+        }
+
+        .game-btn span {
+            font-size: 2rem;
+            filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.4));
+        }
+
+        .btn-scissor {
+            background: var(--button-scissor);
+            box-shadow: 0 12px 0 #110b1a;
+        }
+
+        .btn-paper {
+            background: var(--button-paper);
+            box-shadow: 0 12px 0 #0e1913;
+        }
+
+        .btn-rock {
+            background: var(--button-rock);
+            box-shadow: 0 12px 0 #201710;
+        }
+
+        .vs-area {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 60px;
+            margin: 20px 0 25px;
+            padding: 16px 12px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .fight-message {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fbffc4;
+            background: rgba(10, 18, 28, 0.85);
+            display: inline-block;
+            padding: 8px 24px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .selection-show {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #e6d5b3;
+            background: rgba(0, 0, 0, 0.33);
+            padding: 8px 12px;
+            border-radius: 60px;
+        }
+
+        .player-choice,
+        .computer-choice {
+            background: rgba(0, 0, 0, 0.47);
+            padding: 6px 20px;
+            border-radius: var(--border-radius-sm);
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+        }
+
+        .badge {
+            font-size: 1.8rem;
+        }
+
+        .reset-area {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .reset-btn {
+            background: rgba(214, 161, 90, 0.2);
+            border: 1px solid #ffb86b;
+            padding: 10px 28px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffda99;
+            cursor: pointer;
+            transition: 0.2s;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            font-family: inherit;
+        }
+
+        .reset-btn:active {
+            transform: scale(0.96);
+            background: rgba(255, 179, 71, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #cbad7a;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 550px) {
+            .game-container {
+                padding: 20px 16px;
+            }
+            .game-btn {
+                width: 85px;
+                font-size: 1.2rem;
+                padding: 12px 0;
+            }
+            .game-btn span {
+                font-size: 1.5rem;
+            }
+            .stat-card input {
+                width: 55px;
+                font-size: 1.2rem;
+            }
+            .winner-card input {
+                width: 140px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .choice-buttons {
+                gap: 10px;
+            }
+            .game-btn {
+                width: 75px;
+                font-size: 1rem;
+                flex-direction: column;
+                padding: 10px 0;
+            }
+            .badge {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>✧ سنگ · کاغذ · قیچی ✧</h1>
+
+        <div class="stats-panel">
+            <div class="stat-card">
+                <p>🎲 راند</p>
+                <input type="text" id="round" value="0" readonly>
+            </div>
+            <div class="stat-card">
+                <p>🧑‍🎤 شما</p>
+                <input type="text" id="playerScore" value="0" readonly>
+            </div>
+            <div class="stat-card">
+                <p>🤖 کامپیوتر</p>
+                <input type="text" id="computerScore" value="0" readonly>
+            </div>
+            <div class="stat-card winner-card">
+                <p>🏆 برنده نهایی</p>
+                <input type="text" id="winner" value="-" readonly>
+            </div>
+        </div>
+
+        <div class="vs-area">
+            <div class="fight-message" id="fightMessage">✋ بازی را شروع کن ✌️</div>
+            <div class="selection-show">
+                <div class="player-choice">👇 شما: <span id="playerChoiceDisplay" class="badge">—</span></div>
+                <div class="computer-choice">💻 کامپیوتر: <span id="computerChoiceDisplay" class="badge">—</span></div>
+            </div>
+        </div>
+
+        <div class="choice-buttons">
+            <button class="game-btn btn-scissor" id="scissorBtn" data-choice="scissor"><span>✂️</span> قیچی</button>
+            <button class="game-btn btn-paper" id="paperBtn" data-choice="paper"><span>📄</span> کاغذ</button>
+            <button class="game-btn btn-rock" id="rockBtn" data-choice="rock"><span>🪨</span> سنگ</button>
+        </div>
+
+        <div class="reset-area">
+            <button class="reset-btn" id="resetGameBtn">🔄 شروع مجدد / ریست بازی</button>
+        </div>
+        <footer>اولین نفری که به ۳ امتیاز برسد، برنده‌ی نهایی است</footer>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // --- DOM Elements ---
+            const elements = {
+                round: document.getElementById('round'),
+                playerScore: document.getElementById('playerScore'),
+                computerScore: document.getElementById('computerScore'),
+                winner: document.getElementById('winner'),
+                fightMessage: document.getElementById('fightMessage'),
+                playerChoiceDisplay: document.getElementById('playerChoiceDisplay'),
+                computerChoiceDisplay: document.getElementById('computerChoiceDisplay'),
+                buttons: document.querySelectorAll('.game-btn[data-choice]'),
+                resetBtn: document.getElementById('resetGameBtn')
+            };
+
+            // --- Game State ---
+            const WINNING_SCORE = 3;
+            const CHOICES = ['rock', 'paper', 'scissor'];
+            
+            const PERSIAN_MAP = {
+                rock: { name: 'سنگ', icon: '🪨' },
+                paper: { name: 'کاغذ', icon: '📄' },
+                scissor: { name: 'قیچی', icon: '✂️' }
+            };
+
+            const MESSAGES = {
+                start: '✋ بازی را شروع کن ✌️',
+                reset: '✨ بازی دوباره شروع شد! ✨',
+                gameOver: '🎯 بازی تمام شده! دکمه ریست را بزنید 🎯',
+                playerWin: '🎉 تبریک! شما برنده بازی شدید 🎉',
+                computerWin: '😭 متأسفانه کامپیوتر برنده شد... تلاش دوباره',
+                draw: (p, c) => `🤝 مساوی! هر دو ${p} انتخاب کردید. دوباره تلاش کن 🤝`,
+                win: (p, c) => `✨ برد! ${p} ➕ ➖ ${c} ✨`,
+                lose: (p, c) => `❌ باخت... ${p} vs ${c} ❌`
+            };
+
+            const WINNER_DISPLAY = {
+                player: '🏆 شما پیروز شدید!',
+                computer: '💔 کامپیوتر پیروز شد!',
+                none: '-'
+            };
+
+            let state = {
+                playerScore: 0,
+                computerScore: 0,
+                currentRound: 0,
+                gameActive: true
+            };
+
+            // --- Core Functions ---
+            function getComputerChoice() {
+                return CHOICES[Math.floor(Math.random() * CHOICES.length)];
+            }
+
+            function determineWinner(player, computer) {
+                if (player === computer) return 'draw';
+                
+                const winConditions = {
+                    rock: 'scissor',
+                    paper: 'rock',
+                    scissor: 'paper'
+                };
+                
+                return winConditions[player] === computer ? 'player' : 'computer';
+            }
+
+            function updateUI() {
+                elements.playerScore.value = state.playerScore;
+                elements.computerScore.value = state.computerScore;
+                elements.round.value = state.currentRound;
+            }
+
+            function updateDisplayChoices(playerHand = null, computerHand = null) {
+                elements.playerChoiceDisplay.innerHTML = playerHand 
+                    ? `${PERSIAN_MAP[playerHand].icon} ${PERSIAN_MAP[playerHand].name}` 
+                    : '—';
+                    
+                elements.computerChoiceDisplay.innerHTML = computerHand 
+                    ? `${PERSIAN_MAP[computerHand].icon} ${PERSIAN_MAP[computerHand].name}` 
+                    : '—';
+            }
+
+            function setMessage(message) {
+                elements.fightMessage.innerHTML = message;
+            }
+
+            function checkFinalWinner() {
+                if (state.playerScore >= WINNING_SCORE) {
+                    endGame('player');
+                    return true;
+                }
+                if (state.computerScore >= WINNING_SCORE) {
+                    endGame('computer');
+                    return true;
+                }
+                return false;
+            }
+
+            function endGame(winner) {
+                state.gameActive = false;
+                elements.winner.value = WINNER_DISPLAY[winner];
+                setMessage(winner === 'player' ? MESSAGES.playerWin : MESSAGES.computerWin);
+            }
+
+            function playRound(playerChoice) {
+                if (!state.gameActive) {
+                    setMessage(MESSAGES.gameOver);
+                    return;
+                }
+
+                const computerChoice = getComputerChoice();
+                updateDisplayChoices(playerChoice, computerChoice);
+
+                const result = determineWinner(playerChoice, computerChoice);
+                const playerName = PERSIAN_MAP[playerChoice].name;
+                const computerName = PERSIAN_MAP[computerChoice].name;
+
+                switch (result) {
+                    case 'player':
+                        state.playerScore++;
+                        setMessage(MESSAGES.win(playerName, computerName));
+                        break;
+                    case 'computer':
+                        state.computerScore++;
+                        setMessage(MESSAGES.lose(playerName, computerName));
+                        break;
+                    case 'draw':
+                        setMessage(MESSAGES.draw(playerName, computerName));
+                        break;
+                }
+
+                state.currentRound++;
+                updateUI();
+                checkFinalWinner();
+            }
+
+            function resetGame() {
+                state = {
+                    playerScore: 0,
+                    computerScore: 0,
+                    currentRound: 0,
+                    gameActive: true
+                };
+                
+                updateUI();
+                elements.winner.value = WINNER_DISPLAY.none;
+                updateDisplayChoices();
+                setMessage(MESSAGES.reset);
+            }
+
+            // --- Event Handlers ---
+            function handleChoiceClick(event) {
+                const choice = event.currentTarget.dataset.choice;
+                if (choice) playRound(choice);
+            }
+
+            function handleKeyboard(event) {
+                if (!state.gameActive) return;
+                
+                const keyMap = {
+                    '1': 'rock',
+                    's': 'rock',
+                    'S': 'rock',
+                    '2': 'paper',
+                    'p': 'paper',
+                    'P': 'paper',
+                    '3': 'scissor',
+                    'c': 'scissor',
+                    'C': 'scissor'
+                };
+                
+                const choice = keyMap[event.key];
+                if (choice) {
+                    event.preventDefault();
+                    playRound(choice);
+                } else if (event.key === 'r' || event.key === 'R') {
+                    event.preventDefault();
+                    resetGame();
+                }
+            }
+
+            // --- Initialize ---
+            function init() {
+                // Button events
+                elements.buttons.forEach(button => {
+                    button.addEventListener('click', handleChoiceClick);
+                    const choice = button.dataset.choice;
+                    const keyMap = {
+                        rock: 'کلید 1 یا S',
+                        paper: 'کلید 2 یا P',
+                        scissor: 'کلید 3 یا C'
+                    };
+                    button.title = `${PERSIAN_MAP[choice].name} (${keyMap[choice]})`;
+                });
+
+                elements.resetBtn.addEventListener('click', resetGame);
+                elements.resetBtn.title = 'ریست بازی (کلید R)';
+                
+                document.addEventListener('keydown', handleKeyboard);
+                
+                // Initial state
+                resetGame();
+            }
+
+            // Start the game
+            init();
+        })();
+    </script>
+</body>
+</html>
